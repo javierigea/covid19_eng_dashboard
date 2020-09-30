@@ -345,6 +345,13 @@ function(input, output, session) {
     unique(area_name)
   updateSelectInput(session, "selLtlaNames", choices = LtlaOptions)
   
+  ############## get names of localauthorities for selection ##############
+  LocAuthOptions <- data %>%
+    filter(area_type == 'ltla' | area_type == 'utla') %>%
+    as.data.frame() %$%
+    unique(area_name)
+  updateSelectInput(session, "selLocAuthNames", choices = LocAuthOptions)
+  
   rolling_mean <- rollify(mean, window = 7)
   
   output$RegionPlot <- renderPlot({
@@ -372,6 +379,14 @@ function(input, output, session) {
                       timeframe = LtlaTime,
                       mode = LtlaMode,
                       scale = 'ltla')})
+  
+  output$LocAuthPlot <- renderPlot({
+    selLocAuthAdj = input$selLocAuthAdj
+    if(selLocAuthAdj) {LocAuthMode = 'adj'}else{LocAuthMode = 'raw'}
+    LocAuthTime = as.numeric(input$LocAuthTime)
+    plot_cases_local(entity_names = input$selLocAuthNames,
+                      timeframe = LocAuthTime,
+                      mode = LocAuthMode)})
 }
 
     
