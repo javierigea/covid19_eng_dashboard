@@ -33,7 +33,7 @@ function(input, output, session) {
   #get data processes the latest csv with cases and calculates rolling means
     get_cases_data <- function(latest_csv_path){
       #get pop data
-      pop_xls_path <- '~/Downloads/ukmidyearestimates20192020ladcodes.xls'
+      pop_xls_path <- './data/ukmidyearestimates20192020ladcodes.xls'
       pop_data <- read_excel(pop_xls_path, sheet = 6, skip = 4)
       pop_data <- pop_data %>%
         clean_names() %>%
