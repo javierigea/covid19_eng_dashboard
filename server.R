@@ -388,13 +388,19 @@ function(input, output, session) {
     if (length(entity_match) > 0){
       return(paste0(entity_match, ' - not valid name(s)!'))
     }
-    
     #subset to timeframe
     data <- data %>%
       filter(specimen_date >= (max(as.Date(data$specimen_date))-(7*timeframe)))
+    
+    #remove last 4 days in timeframe
+    date_threshold <- 4
+    data <- data %>%
+      filter(specimen_date <= (max(as.Date(data$specimen_date))-date_threshold))
     #divide tibble into entity_data and rest_data
     entity_data <- data %>%
       filter(area_name %in% entity_names)
+    #get maxdate
+    maxdate <- as.Date(max(data[['specimen_date']]))
     if (mode == 'raw') {
       #plot mean_week
       ymax = max(entity_data$mean_week)*1.10
@@ -409,28 +415,29 @@ function(input, output, session) {
                                           y = mean_week,
                                           group = area_name,
                                           color = area_name),
-                  size = 2) +
-        #color = entity_data$linecolour) +
+                  size = 2,
+                  show.legend = F) +
         scale_color_brewer(palette="Set2") +
-        #scale_colour_discrete(guide = 'none') +
-        #scale_x_discrete(expand=c(0, 3)) +
-        #scale_y_continuous(trans = 'log10') + 
+        scale_y_continuous(expand=c(0, 0),limits = c(0,ymax)) +
+        scale_x_date(expand=c(0,0),
+                     date_labels = "%d %b",
+                     breaks=seq(min(data[['specimen_date']]),max(data[['specimen_date']]),length.out = 6)) +
         geom_dl(data = entity_data, aes(x = specimen_date,
                                         y = mean_week,
                                         label = area_name,color = area_name), method = list(dl.combine("last.points"),dl.trans(x=x+0.1),fontface = "bold"), cex = 0.8) +
-        ylim(0,ymax) +
+        
         #scale_y_continuous(trans = 'log10') + 
         ylab('number of daily COVID-19 positives') +
         xlab('date of test') +
-        #geom_dl(aes(label = area_name), method = list(dl.combine("first.points", "last.points")), cex = 0.8) +
         theme_classic() +
+        coord_cartesian(clip = "off")+
         theme(strip.background  = element_blank(),
               strip.text.x = element_text(size = 12),
               axis.text.x = element_text(size=12),
               axis.title.x = element_text(size=14),
               axis.text.y = element_text(size=12),
               axis.title.y = element_text(size=14),
-              legend.position = 'none')
+              plot.margin=unit(c(3,3,3.5,3.2),"cm"))
       #legend.title = element_blank())
       
       
@@ -442,24 +449,26 @@ function(input, output, session) {
                                    y = mean_week_pop,
                                    group = area_name),
                   size = 0.25,
+                  show.legend = F,
                   color = 'grey') +
         
         geom_line(data = entity_data, aes(x = specimen_date,
                                           y = mean_week_pop,
                                           group = area_name,
                                           color = area_name),
+                  show.legend = F,
                   size = 2) +
-        #color = entity_data$linecolour) +
         scale_color_brewer(palette="Set2") +
-        #scale_colour_discrete(guide = 'none') +
-        #scale_x_discrete(expand=c(0, 3)) +
+        scale_y_continuous(expand=c(0, 0),limits = c(0,ymax)) +
+        scale_x_date(expand=c(0,0),
+                     date_labels = "%d %b",
+                     breaks=seq(min(data[['specimen_date']]),max(data[['specimen_date']]),length.out = 6)) +
         geom_dl(data = entity_data, aes(x = specimen_date,
                                         y = mean_week_pop,
                                         label = area_name,color = area_name), method = list(dl.combine("last.points"),dl.trans(x=x+0.1),fontface = "bold"), cex = 0.8) +
-        ylim(0,ymax) +
-        ylab('number of daily COVID-19 positives pero 100k') +
+        ylab('number of daily COVID-19 positives per 100k') +
         xlab('date of test') +
-        #geom_dl(aes(label = area_name), method = list(dl.combine("first.points", "last.points")), cex = 0.8) +
+        coord_cartesian(clip = "off")+
         theme_classic() +
         theme(strip.background  = element_blank(),
               strip.text.x = element_text(size = 12),
@@ -467,7 +476,7 @@ function(input, output, session) {
               axis.title.x = element_text(size=14),
               axis.text.y = element_text(size=12),
               axis.title.y = element_text(size=14),
-              legend.position = 'none')
+              plot.margin=unit(c(3,3,3.5,3.2),"cm"))
       #legend.title = element_blank())
     }
   }
