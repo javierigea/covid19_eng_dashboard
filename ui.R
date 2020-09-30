@@ -32,6 +32,7 @@ sidebar =  dashboardSidebar(width = 230,
                                         menuItem("Regions", tabName = "regions", icon = icon("city", lib = "font-awesome")),
                                         menuItem("UTLA", tabName = "utla", icon = icon("city", lib = "font-awesome")),
                                         menuItem("LTLA", tabName = "ltla", icon = icon("city", lib = "font-awesome")),
+                                        menuItem("Local Authorities", tabName = "locauth", icon = icon("city", lib = "font-awesome")),
                                         conditionalPanel(condition = "['regions'].includes(input.tabs)",
                                                          selectInput("selRegionNames", "Regions", choices ="", multiple = TRUE, selectize = TRUE),
                                                          checkboxInput("selRegionAdj", "Show positives per 100k in Region", value = TRUE),
@@ -43,7 +44,12 @@ sidebar =  dashboardSidebar(width = 230,
                                         conditionalPanel(condition = "['ltla'].includes(input.tabs)",
                                                          selectInput("selLtlaNames", "LTLA", choices ="", multiple = TRUE, selectize = TRUE),
                                                          checkboxInput("selLtlaAdj", "Show positives per 100k in LTLA", value = TRUE),
-                                                         sliderInput("selLtlaTime", "Last N Weeks", ticks = FALSE, min = 2, max = 30, value = 2, step = 1)
+                                                         sliderInput("selLtlaTime", "Last N Weeks", ticks = FALSE, min = 2, max = 30, value = 2, step = 1)),
+                                        conditionalPanel(condition = "['locauth'].includes(input.tabs)",
+                                                         selectInput("selLocAuthNames", "Local Authorities", choices ="", multiple = TRUE, selectize = TRUE, max = 8),
+                                                         checkboxInput("selLocAuthAdj", "Show positives per 100k in Local Authority", value = TRUE),
+                                                         sliderInput("selLocAuthTime", "Last N Weeks", ticks = FALSE, min = 2, max = 30, value = 2, step = 1)
+                                                         
                                                          )
                                         )
                             )
