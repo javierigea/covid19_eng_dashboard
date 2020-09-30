@@ -3,3 +3,5 @@
 .RData
 .Ruserdata
 covid19_eng_dashboard.Rproj
+.DS_Store
+rsconnect

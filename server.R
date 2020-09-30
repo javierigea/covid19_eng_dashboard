@@ -19,7 +19,7 @@ library(directlabels)
 function(input, output, session) {
   latest_csv_path <- "https://coronavirus.data.gov.uk/downloads/csv/coronavirus-cases_latest.csv"
   
-  pop_xls_path <- '~/Downloads/ukmidyearestimates20192020ladcodes.xls'
+  pop_xls_path <- './data/ukmidyearestimates20192020ladcodes.xls'
   
   pop_data <- read_excel(pop_xls_path, sheet = 6, skip = 4)
   pop_data <- pop_data %>%
