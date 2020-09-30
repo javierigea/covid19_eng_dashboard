@@ -10,6 +10,9 @@ library(magrittr)
 library(dbplyr)
 library(stringr)
 library(tibbletime)
+library(RColorBrewer)
+library(directlabels)
+
 
 
 
@@ -47,7 +50,6 @@ function(input, output, session) {
     #check if all entities are in the correct category scale
     #entity_match = entity_names[!entity_names %in% unique(data[data$area_type == scale, 'area_name'])]
     entity_match = entity_names[!entity_names %in% unique(pull(data[data$area_type == scale, 'area_name']))]
-    print(entity_match)
     #print wrong entities and exit
     if (length(entity_match) > 0){
       return(paste0(entity_match, ' - not valid ', scale, ' name(s)!'))
@@ -167,15 +169,7 @@ function(input, output, session) {
       return ('max limit of 8 places to check, sorry!')
     }
     
-    #get pop data
-    pop_xls_path <- '~/Downloads/ukmidyearestimates20192020ladcodes.xls'
-    pop_data <- read_excel(pop_xls_path, sheet = 6, skip = 4)
-    pop_data <- pop_data %>%
-      clean_names() %>%
-      select(code, all_ages)
-    
-    rolling_mean <- rollify(mean, window = 7)
-    
+   
     #clean column names, select entity and arrange by date
     data <- read_csv(latest_csv_path) %>%
       clean_names() %>% 
@@ -224,6 +218,7 @@ function(input, output, session) {
       mean_week = rolling_mean(daily_lab_confirmed_cases)
       
     )
+
     data <-  mutate(data,
                     day_of_week = weekdays(as.Date(specimen_date)),
                     specimen_date = as.Date(specimen_date))
@@ -234,18 +229,9 @@ function(input, output, session) {
     #subset to timeframe
     data <- data %>%
       filter(specimen_date >= (max(as.Date(data$specimen_date))-(7*timeframe)))
-    
     #divide tibble into entity_data and rest_data
     entity_data <- data %>%
       filter(area_name %in% entity_names)
-    #calculate ymax within function (depends on adj or raw)
-    entity_colours <- brewer.pal(length(entity_names), 'Set2')
-    
-    for(i in c(1:length(entity_names))){
-      entity_data[entity_data$area_name == entity_names[i],'linecolour'] <- entity_colours[i]
-      
-    }
-    
     if (mode == 'raw') {
       #plot mean_week
       ymax = max(entity_data$mean_week)*1.10
@@ -381,12 +367,18 @@ function(input, output, session) {
                       scale = 'ltla')})
   
   output$LocAuthPlot <- renderPlot({
-    selLocAuthAdj = input$selLocAuthAdj
-    if(selLocAuthAdj) {LocAuthMode = 'adj'}else{LocAuthMode = 'raw'}
-    LocAuthTime = as.numeric(input$LocAuthTime)
-    plot_cases_local(entity_names = input$selLocAuthNames,
-                      timeframe = LocAuthTime,
-                      mode = LocAuthMode)})
+    
+    if(!is.null(input$selLocAuthNames)){
+      selLocAuthAdj = input$selLocAuthAdj
+      if(selLocAuthAdj) {LocAuthMode = 'adj'}else{LocAuthMode = 'raw'}
+      LocAuthTime = as.numeric(input$selLocAuthTime)
+      plot_cases_local(entity_names = input$selLocAuthNames,
+                       timeframe = LocAuthTime,
+                       mode = LocAuthMode)
+    
+    }})
+      
+    
 }
 
     

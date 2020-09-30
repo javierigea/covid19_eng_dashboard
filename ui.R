@@ -46,7 +46,7 @@ sidebar =  dashboardSidebar(width = 230,
                                                          checkboxInput("selLtlaAdj", "Show positives per 100k in LTLA", value = TRUE),
                                                          sliderInput("selLtlaTime", "Last N Weeks", ticks = FALSE, min = 2, max = 30, value = 2, step = 1)),
                                         conditionalPanel(condition = "['locauth'].includes(input.tabs)",
-                                                         selectInput("selLocAuthNames", "Local Authorities", choices ="", multiple = TRUE, selectize = TRUE, max = 8),
+                                                         selectInput("selLocAuthNames", "Local Authorities", choices ="", multiple = TRUE, selectize = TRUE),
                                                          checkboxInput("selLocAuthAdj", "Show positives per 100k in Local Authority", value = TRUE),
                                                          sliderInput("selLocAuthTime", "Last N Weeks", ticks = FALSE, min = 2, max = 30, value = 2, step = 1)
                                                          
@@ -80,7 +80,13 @@ body  =  dashboardBody(tabItems(tabItem(tabName = "start",
                                         fluidRow(box(width = 12,
                                                      title = "ltla",
                                                      plotOutput("LtlaPlot"),
+                                                     br()))),
+                                tabItem(tabName = "locauth",
+                                        fluidRow(box(width = 12,
+                                                     title = "COVID-19 Cases in Local Authorities in England",
+                                                     plotOutput("LocAuthPlot"),
                                                      br())))
+                                
 ))
 
 
