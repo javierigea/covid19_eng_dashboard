@@ -26,6 +26,9 @@ function(input, output, session) {
     select(code, all_ages)
   
   rolling_mean <- rollify(mean, window = 7)
+  
+  ############ FUNCTIONS BLOCK#############
+  ####plot_cases_entity plots a barplot with daily cases + rolling averages####
   plot_cases_entity <- function(entity_names, 
                                 timeframe = time, 
                                 mode = c('raw', 'adj'), 
@@ -148,6 +151,179 @@ function(input, output, session) {
       
     }
   }
+  
+  
+  
+  
+  ####plot_cases_local plots lines of rolling averages for up to 8 local authorities####
+  plot_cases_local <- function(entity_names, 
+                               timeframe = time, 
+                               mode = c('raw', 'adj'))
+    
+    
+  {
+    #set a limit of 8 entities to check
+    if (length(entity_names) > 8){
+      return ('max limit of 8 places to check, sorry!')
+    }
+    
+    #get pop data
+    pop_xls_path <- '~/Downloads/ukmidyearestimates20192020ladcodes.xls'
+    pop_data <- read_excel(pop_xls_path, sheet = 6, skip = 4)
+    pop_data <- pop_data %>%
+      clean_names() %>%
+      select(code, all_ages)
+    
+    rolling_mean <- rollify(mean, window = 7)
+    
+    #clean column names, select entity and arrange by date
+    data <- read_csv(latest_csv_path) %>%
+      clean_names() %>% 
+      filter(area_type == 'utla' | area_type == 'ltla' ) %>% 
+      #drop rows that are utla and ltla
+      select(-area_type) %>% 
+      distinct() %>% 
+      mutate(specimen_date = as.Date(specimen_date))
+    #check if all entities are in the correct category scale
+    #entity_match = entity_names[!entity_names %in% unique(data[data$area_type == scale, 'area_name'])]
+    entity_match = entity_names[!entity_names %in% unique(data$area_name)]
+    #print wrong entities and exit
+    if (length(entity_match) > 0){
+      return(paste0(entity_match, ' - not valid name(s)!'))
+    }
+    
+    #
+    #add a column with pop size
+    data <- merge(data,
+                  pop_data,
+                  by.x = 'area_code',
+                  by.y = 'code',
+                  all.x =T)
+    
+    
+    data <- data %>%
+      arrange(specimen_date)
+    
+    #split the dataframe by area name to fill in days with 0 cases + rejoin it
+    list_df <- split(data,
+                     as.character(data$area_name))
+    list_df <- lapply(list_df, function(x) x %>% 
+                        pad %>% fill_by_value(as.Date(specimen_date)) %>%
+                        mutate(daily_lab_confirmed_cases = replace_na(daily_lab_confirmed_cases, 0)) %>%
+                        fill(colnames(x)))
+    data <- do.call("rbind",
+                    list_df)
+    data <- data %>%
+      arrange(specimen_date)
+    #add 7 day rolling mean
+    rolling_mean <- rollify(mean, window = 7)
+    
+    data <- ddply(
+      data, "area_name",
+      mutate,
+      mean_week = rolling_mean(daily_lab_confirmed_cases)
+      
+    )
+    data <-  mutate(data,
+                    day_of_week = weekdays(as.Date(specimen_date)),
+                    specimen_date = as.Date(specimen_date))
+    #add population adjusted variables
+    data <-  mutate(data,
+                    mean_week_pop = ((mean_week / all_ages) * 100000),
+                    daily_cases_pop = ((daily_lab_confirmed_cases / all_ages) * 100000))
+    #subset to timeframe
+    data <- data %>%
+      filter(specimen_date >= (max(as.Date(data$specimen_date))-(7*timeframe)))
+    
+    #divide tibble into entity_data and rest_data
+    entity_data <- data %>%
+      filter(area_name %in% entity_names)
+    #calculate ymax within function (depends on adj or raw)
+    entity_colours <- brewer.pal(length(entity_names), 'Set2')
+    
+    for(i in c(1:length(entity_names))){
+      entity_data[entity_data$area_name == entity_names[i],'linecolour'] <- entity_colours[i]
+      
+    }
+    
+    if (mode == 'raw') {
+      #plot mean_week
+      ymax = max(entity_data$mean_week)*1.10
+      ggplot() +
+        geom_line(data = data, aes(x = specimen_date,
+                                   y = mean_week,
+                                   group = area_name),
+                  size = 0.25,
+                  color = 'grey') +
+        
+        geom_line(data = entity_data, aes(x = specimen_date,
+                                          y = mean_week,
+                                          group = area_name,
+                                          color = area_name),
+                  size = 2) +
+        #color = entity_data$linecolour) +
+        scale_color_brewer(palette="Set2") +
+        #scale_colour_discrete(guide = 'none') +
+        #scale_x_discrete(expand=c(0, 3)) +
+        #scale_y_continuous(trans = 'log10') + 
+        geom_dl(data = entity_data, aes(x = specimen_date,
+                                        y = mean_week,
+                                        label = area_name,color = area_name), method = list(dl.combine("last.points"),dl.trans(x=x+0.1),fontface = "bold"), cex = 0.8) +
+        ylim(0,ymax) +
+        #scale_y_continuous(trans = 'log10') + 
+        ylab('number of daily COVID-19 positives') +
+        xlab('date of test') +
+        #geom_dl(aes(label = area_name), method = list(dl.combine("first.points", "last.points")), cex = 0.8) +
+        theme_classic() +
+        theme(strip.background  = element_blank(),
+              strip.text.x = element_text(size = 12),
+              axis.text.x = element_text(size=12),
+              axis.title.x = element_text(size=14),
+              axis.text.y = element_text(size=12),
+              axis.title.y = element_text(size=14),
+              legend.position = 'none')
+      #legend.title = element_blank())
+      
+      
+    } else if (mode == 'adj') {
+      #plot mean_week
+      ymax = max(entity_data$mean_week_pop)*1.10
+      ggplot() +
+        geom_line(data = data, aes(x = specimen_date,
+                                   y = mean_week_pop,
+                                   group = area_name),
+                  size = 0.25,
+                  color = 'grey') +
+        
+        geom_line(data = entity_data, aes(x = specimen_date,
+                                          y = mean_week_pop,
+                                          group = area_name,
+                                          color = area_name),
+                  size = 2) +
+        #color = entity_data$linecolour) +
+        scale_color_brewer(palette="Set2") +
+        #scale_colour_discrete(guide = 'none') +
+        #scale_x_discrete(expand=c(0, 3)) +
+        geom_dl(data = entity_data, aes(x = specimen_date,
+                                        y = mean_week_pop,
+                                        label = area_name,color = area_name), method = list(dl.combine("last.points"),dl.trans(x=x+0.1),fontface = "bold"), cex = 0.8) +
+        ylim(0,ymax) +
+        ylab('number of daily COVID-19 positives pero 100k') +
+        xlab('date of test') +
+        #geom_dl(aes(label = area_name), method = list(dl.combine("first.points", "last.points")), cex = 0.8) +
+        theme_classic() +
+        theme(strip.background  = element_blank(),
+              strip.text.x = element_text(size = 12),
+              axis.text.x = element_text(size=12),
+              axis.title.x = element_text(size=14),
+              axis.text.y = element_text(size=12),
+              axis.title.y = element_text(size=14),
+              legend.position = 'none')
+      #legend.title = element_blank())
+    }
+  }
+  ##################END OF FUNCTIONS BLOCK##################
+  
   ############## get names of regions for selection ##############
   RegionOptions <- data %>%
     filter(area_type == 'region') %>%
