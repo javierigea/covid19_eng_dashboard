@@ -29,7 +29,7 @@ header = dashboardHeader(title = 'Coronavirus in England')
 sidebar =  dashboardSidebar(width = 230,
                             sidebarMenu(id = "tabs",
                                         menuItem("start", tabName = "start", icon = icon("dashboard"), selected = T),
-                                        menuItem("Regions", tabName = "regions", icon = icon("city", lib = "font-awesome")),
+                                        menuItem("Regions", tabName = "regions", icon = icon("map", lib = "font-awesome")),
                                         #menuItem("UTLA", tabName = "utla", icon = icon("city", lib = "font-awesome")),
                                         #menuItem("LTLA", tabName = "ltla", icon = icon("city", lib = "font-awesome")),
                                         menuItem("Local Authorities", tabName = "locauth", icon = icon("city", lib = "font-awesome")),
