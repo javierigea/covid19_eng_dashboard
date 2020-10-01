@@ -440,7 +440,7 @@ function(input, output, session) {
                                         label = area_name,color = area_name), method = list(dl.combine("last.points"),dl.trans(x=x+0.1),fontface = "bold"), cex = 0.8) +
         
         #scale_y_continuous(trans = 'log10') + 
-        ylab('number of daily COVID-19 positives') +
+        ylab('daily COVID-19 positives') +
         xlab('date of test') +
         theme_classic() +
         coord_cartesian(clip = "off")+
@@ -479,7 +479,7 @@ function(input, output, session) {
         geom_dl(data = entity_data, aes(x = specimen_date,
                                         y = mean_week_pop,
                                         label = area_name,color = area_name), method = list(dl.combine("last.points"),dl.trans(x=x+0.1),fontface = "bold"), cex = 0.8) +
-        ylab('number of daily COVID-19 positives per 100k') +
+        ylab('daily COVID-19 positives per 100k') +
         xlab('date of test') +
         coord_cartesian(clip = "off")+
         theme_classic() +
@@ -507,6 +507,7 @@ function(input, output, session) {
   ############## get names of regions for selection ##############
   RegionOptions <- data %>%
     filter(area_type == 'region') %>%
+    filter(area_code %in% pop_data[['code']]) %>% 
     as.data.frame() %$%
     unique(area_name)
   updateSelectInput(session, "selRegionNames", choices = RegionOptions)
@@ -528,6 +529,7 @@ function(input, output, session) {
   ############## get names of localauthorities for selection ##############
   LocAuthOptions <- data %>%
     filter(area_type == 'ltla' | area_type == 'utla') %>%
+    filter(area_code %in% pop_data[['code']]) %>% 
     as.data.frame() %$%
     unique(area_name)
   updateSelectInput(session, "selLocAuthNames", choices = LocAuthOptions)
