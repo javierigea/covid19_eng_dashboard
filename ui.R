@@ -25,6 +25,8 @@ library(tibbletime)
 #### HEADER ####
 header = dashboardHeader(title = 'Coronavirus in England')
 
+#do not display data older than 10th March 2020
+maxweeks <- as.numeric(ceiling(difftime(Sys.Date(),as.Date("2020-03-10"),units='weeks')))
 #### SIDEBAR ####
 sidebar =  dashboardSidebar(width = 230,
                             sidebarMenu(id = "tabs",
@@ -36,19 +38,19 @@ sidebar =  dashboardSidebar(width = 230,
                                         conditionalPanel(condition = "['regions'].includes(input.tabs)",
                                                          selectInput("selRegionNames", "Regions", choices ="", multiple = TRUE, selectize = TRUE),
                                                          checkboxInput("selRegionAdj", "Show positives per 100k in Region", value = TRUE),
-                                                         sliderInput("selRegionTime", "Last N Weeks", ticks = FALSE, min = 2, max = 30, value = 2, step = 1)),
+                                                         sliderInput("selRegionTime", "Last N Weeks", ticks = FALSE, min = 2, max = maxweeks, value = 2, step = 1)),
                                         # conditionalPanel(condition = "['utla'].includes(input.tabs)",
                                         #                  selectInput("selUtlaNames", "UTLA", choices ="", multiple = TRUE, selectize = TRUE),
                                         #                  checkboxInput("selUtlaAdj", "Show positives per 100k in UTLA", value = TRUE),
-                                        #                  sliderInput("selUtlaTime", "Last N Weeks", ticks = FALSE, min = 2, max = 30, value = 2, step = 1)),
+                                        #                  sliderInput("selUtlaTime", "Last N Weeks", ticks = FALSE, min = 2, max = maxweeks, value = 2, step = 1)),
                                         # conditionalPanel(condition = "['ltla'].includes(input.tabs)",
                                         #                  selectInput("selLtlaNames", "LTLA", choices ="", multiple = TRUE, selectize = TRUE),
                                         #                  checkboxInput("selLtlaAdj", "Show positives per 100k in LTLA", value = TRUE),
-                                        #                  sliderInput("selLtlaTime", "Last N Weeks", ticks = FALSE, min = 2, max = 30, value = 2, step = 1)),
+                                        #                  sliderInput("selLtlaTime", "Last N Weeks", ticks = FALSE, min = 2, max = maxweeks, value = 2, step = 1)),
                                         conditionalPanel(condition = "['locauth'].includes(input.tabs)",
                                                          selectInput("selLocAuthNames", "Local Authorities", choices ="", multiple = TRUE, selectize = TRUE),
                                                          checkboxInput("selLocAuthAdj", "Show positives per 100k in Local Authority", value = TRUE),
-                                                         sliderInput("selLocAuthTime", "Last N Weeks", ticks = FALSE, min = 2, max = 30, value = 2, step = 1)
+                                                         sliderInput("selLocAuthTime", "Last N Weeks", ticks = FALSE, min = 2, max = maxweeks, value = 2, step = 1)
                                                          
                                                          )
                                         )
