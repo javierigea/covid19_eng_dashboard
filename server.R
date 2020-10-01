@@ -440,7 +440,7 @@ function(input, output, session) {
                                         label = area_name,color = area_name), method = list(dl.combine("last.points"),dl.trans(x=x+0.1),fontface = "bold"), cex = 0.8) +
         
         #scale_y_continuous(trans = 'log10') + 
-        ylab('daily COVID-19 positives') +
+        ylab('daily positive cases') +
         xlab('date of test') +
         theme_classic() +
         coord_cartesian(clip = "off")+
@@ -479,7 +479,7 @@ function(input, output, session) {
         geom_dl(data = entity_data, aes(x = specimen_date,
                                         y = mean_week_pop,
                                         label = area_name,color = area_name), method = list(dl.combine("last.points"),dl.trans(x=x+0.1),fontface = "bold"), cex = 0.8) +
-        ylab('daily COVID-19 positives per 100k') +
+        ylab('daily positive cases per 100k') +
         xlab('date of test') +
         coord_cartesian(clip = "off")+
         theme_classic() +
