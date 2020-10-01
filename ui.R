@@ -22,6 +22,9 @@ library(zoo)
 library(padr)
 library(tibbletime)
 
+
+
+
 #### HEADER ####
 header = dashboardHeader(title = 'Coronavirus in England')
 
@@ -52,7 +55,7 @@ sidebar =  dashboardSidebar(width = 230,
                                                          checkboxInput("selLocAuthAdj", "Show positives per 100k in Local Authority", value = TRUE),
                                                          sliderInput("selLocAuthTime", "Last N Weeks", ticks = FALSE, min = 2, max = maxweeks, value = 2, step = 1)
                                                          
-                                                         )
+                                                         ),
                                         )
                             )
 
