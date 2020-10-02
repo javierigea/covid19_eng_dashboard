@@ -12,8 +12,9 @@ library(stringr)
 library(tibbletime)
 library(RColorBrewer)
 library(directlabels)
-
-
+library(viridis)
+library(sf)
+library(grDevices)
 
 
 function(input, output, session) {
@@ -27,7 +28,8 @@ function(input, output, session) {
     select(code, all_ages)
   
   rolling_mean <- rollify(mean, window = 7)
-  
+  #read map
+  map <-readRDS('./data/data_counties_simplified.RDS')
   ############ FUNCTIONS BLOCK#############
   
   #get data processes the latest csv with cases and calculates rolling means
@@ -69,17 +71,18 @@ function(input, output, session) {
                     all.x =T)
       data <- data %>%
         arrange(specimen_date)
-      #split the dataframe by area name to fill in days with 0 cases + rejoin it
-      list_df <- split(data,
-                       as.character(data$area_name))
-      list_df <- lapply(list_df, function(x) x %>% 
-                          pad %>% fill_by_value(as.Date(specimen_date)) %>%
-                          mutate(daily_lab_confirmed_cases = replace_na(daily_lab_confirmed_cases, 0)) %>%
-                          fill(colnames(x)))
-      data <- do.call("rbind",
-                      list_df)
-      data <- data %>%
-        arrange(specimen_date)
+      # #this was only needed with a previous format of the csv
+      # #split the dataframe by area name to fill in days with 0 cases + rejoin it
+      # list_df <- split(data,
+      #                  as.character(data$area_name))
+      # list_df <- lapply(list_df, function(x) x %>% 
+      #                     pad %>% fill_by_value(as.Date(specimen_date)) %>%
+      #                     mutate(daily_lab_confirmed_cases = replace_na(daily_lab_confirmed_cases, 0)) %>%
+      #                     fill(colnames(x)))
+      # data <- do.call("rbind",
+      #                 list_df)
+      # data <- data %>%
+      #   arrange(specimen_date)
       #add 7 day rolling mean
       rolling_mean <- rollify(mean, window = 7)
       data <- ddply(
@@ -494,7 +497,65 @@ function(input, output, session) {
     }
   }
   
+  
+  ###plot weekly totals of infection in a map
+  plot_map_cases_week <- function(map, local_cases_data, week_ending_date){
     
+    #select data to week ending on week_ending_date
+    local_cases_data_sum <- as_tibble(local_cases_data) %>%
+      filter(specimen_date <= as.Date(week_ending_date), specimen_date >= as.Date(week_ending_date)-7) %>% 
+      dplyr::group_by(area_code) %>% 
+      dplyr::summarize(weekly_cases_pop=sum(daily_cases_pop,na.rm = T))
+    
+    #add column of weekly_cases_pop to dataframe
+    data_counties_simplified <- merge(map,
+                                      local_cases_data_sum,
+                                      by.x = 'LAD19CD',
+                                      by.y = 'area_code',
+                                      all.x = T)
+    #plot the map
+    plot(data_counties_simplified["weekly_cases_pop"],
+         main = paste0('Total Cases (per 100k population) in week ending ',week_ending_date),
+         #breaks = "quantile", nbreaks = 12,
+         nbreaks = 20,
+         pal = plasma,
+         border = NA,
+         bg = 'lightgrey')
+  }
+  
+  ###plot weekly changes in totals of infection in a map
+  plot_map_change_cases_week <- function(map, local_cases_data, week_ending_date){
+    
+    #select data to week ending on week_ending_date
+    local_change_cases_data_week <- as_tibble(local_cases_data) %>%
+      filter(specimen_date <= as.Date(week_ending_date), specimen_date >= as.Date(week_ending_date)-7) %>% 
+      dplyr::group_by(area_code) %>% 
+      dplyr::summarize(weekly_cases_pop=sum(daily_cases_pop,na.rm = T))
+    
+    local_cases_data_week1 <- as_tibble(local_cases_data) %>%
+      filter(specimen_date <= as.Date(week_ending_date)-7, specimen_date >= as.Date(week_ending_date)-14) %>% 
+      dplyr::group_by(area_code) %>% 
+      dplyr::summarize(weekly_cases_pop_1=sum(daily_cases_pop,na.rm = T))
+    
+    local_change_cases_data_week <- merge(local_change_cases_data_week,
+                                          local_cases_data_week1)
+    local_change_cases_data_week$weekly_cases_change_pop <- local_change_cases_data_week$weekly_cases_pop-local_change_cases_data_week$weekly_cases_pop_1
+    #add column of weekly_cases_pop to dataframe
+    data_counties_simplified <- merge(map,
+                                      local_change_cases_data_week,
+                                      by.x = 'LAD19CD',
+                                      by.y = 'area_code',
+                                      all.x = T)
+    #plot the map
+    plot(data_counties_simplified["weekly_cases_change_pop"],
+         main = paste0('Change in total cases (per 100k population) between week ending ',week_ending_date,' and week ending ',as.Date(week_ending_date)-7),
+         #breaks = "quantile", nbreaks = 12,
+         nbreaks = 20,
+         pal = colorRampPalette(c("blue","white","red")),
+         border = NA,
+         bg = 'lightgrey')
+  }
+  
   ##################END OF FUNCTIONS BLOCK##################
     region_cases_data <- get_cases_data(latest_csv_path = latest_csv_path,
                                        mode = 'region')
@@ -598,7 +659,26 @@ function(input, output, session) {
                        mode = LocAuthMode)
     
     }})
+  output$MapWeeklyCases <- renderPlot({
+    
+    if(!is.null(input$selWeekEnding)){
+      week_ending_date <- as.Date(input$selWeekEnding)
+      plot_map_cases_week(map = map,
+                          local_cases_data = local_cases_data,
+                          week_ending_date = week_ending_date)
       
+    }})
+  
+  output$MapChangeWeeklyCases <- renderPlot({
+    
+    if(!is.null(input$selChangeWeekEnding)){
+      week_ending_date <- as.Date(input$selChangeWeekEnding)
+      plot_map_change_cases_week(map = map,
+                          local_cases_data = local_cases_data,
+                          week_ending_date = week_ending_date)
+      
+    }})
+    
     
 }
 
