@@ -26,14 +26,14 @@ library(tibbletime)
 
 
 #### HEADER ####
-header = dashboardHeader(title = 'Coronavirus in England')
+header = dashboardHeader(title = span("Coronavirus Cases in England", 
+                              style = "color: black; font-size: 12px"))
 
 #do not display data older than 10th March 2020
 maxweeks <- as.numeric(ceiling(difftime(Sys.Date(),as.Date("2020-03-10"),units='weeks')))
 #### SIDEBAR ####
 sidebar =  dashboardSidebar(width = 230,
                             sidebarMenu(id = "tabs",
-                                        menuItem("start", tabName = "start", icon = icon("dashboard"), selected = T),
                                         menuItem("Regions", tabName = "regions", icon = icon("city", lib = "font-awesome")),
                                         #menuItem("UTLA", tabName = "utla", icon = icon("city", lib = "font-awesome")),
                                         #menuItem("LTLA", tabName = "ltla", icon = icon("city", lib = "font-awesome")),
@@ -57,9 +57,9 @@ sidebar =  dashboardSidebar(width = 230,
                                                          checkboxInput("selLocAuthAdj", "Show positives per 100k in Local Authority", value = TRUE),
                                                          sliderInput("selLocAuthTime", "Last N Weeks", ticks = FALSE, min = 2, max = maxweeks, value = 2, step = 1)),
                                         conditionalPanel(condition = "['map_weekly_cases'].includes(input.tabs)",
-                                                         dateInput("selWeekEnding", "Show total cases for week ending on", min = '2020-03-10', max = Sys.Date()-4)),
+                                                         dateInput("selWeekEnding", "Show total cases for week ending on", min = '2020-03-10', max = Sys.Date()-4),default = Sys.Date()-4),
                                         conditionalPanel(condition = "['map_change_weekly_cases'].includes(input.tabs)",
-                                                         dateInput("selChangeWeekEnding", "Show change in total cases for week ending on and previous week", min = '2020-03-10', max = Sys.Date()-4))
+                                                         dateInput("selChangeWeekEnding", "Show change in total cases for week ending on and previous week", min = '2020-03-10', max = Sys.Date()-4),default = Sys.Date()-4)
                                                        
                                         )
                             )
@@ -72,10 +72,7 @@ sidebar =  dashboardSidebar(width = 230,
                                         
 
 #### BODY ####
-body  =  dashboardBody(tabItems(tabItem(tabName = "start",
-                                        fluidRow(box("Introduction",
-                                                      "blablabla"))),
-                                tabItem(tabName = "regions",
+body  =  dashboardBody(tabItems(tabItem(tabName = "regions",
                                         fluidRow(box(width = 12,
                                                      title = "Regions",
                                                      plotOutput("RegionPlot"),

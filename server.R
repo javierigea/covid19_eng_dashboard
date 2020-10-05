@@ -1,4 +1,5 @@
-
+library(gridExtra)
+library(grid)
 library(shiny)
 library(shinydashboard)
 library(dplyr)
@@ -405,6 +406,7 @@ function(input, output, session) {
       return(paste0(entity_match, ' - not valid name(s)!'))
     }
     #subset to timeframe
+    last_update_date <- as.character(max(data$specimen_date))
     data <- data %>%
       filter(specimen_date >= (max(as.Date(data$specimen_date))-(7*timeframe)))
     
@@ -419,6 +421,7 @@ function(input, output, session) {
     maxdate <- as.Date(max(data[['specimen_date']]))
     if (mode == 'raw') {
       #plot mean_week
+      #caption <- expression(paste('Example map with ', bold(last_update_date), aaaa))
       ymax = max(entity_data$mean_week)*1.10
       ggplot() +
         geom_line(data = data, aes(x = specimen_date,
@@ -446,14 +449,19 @@ function(input, output, session) {
         ylab('daily positive cases') +
         xlab('date of test') +
         theme_classic() +
+        #labs(subtitle='Seven day rolling average of new cases\nData from PH England', hjust = 1)+
         coord_cartesian(clip = "off")+
+        labs(caption = bquote('\nLast updated at'~bold(.(last_update_date))),
+             title = bquote('Seven day rolling average of new daily cases*\nData from PH England\n*Cases from last 4 days not included to correct for delay between test and report')) +
         theme(strip.background  = element_blank(),
+              plot.caption = element_text(hjust = 1),
+              plot.title = element_text(hjust = 1,size = 8),
               strip.text.x = element_text(size = 12),
               axis.text.x = element_text(size=12),
               axis.title.x = element_text(size=14),
               axis.text.y = element_text(size=12),
               axis.title.y = element_text(size=14),
-              plot.margin=unit(c(3,3,3.5,3.2),"cm"))
+              plot.margin=unit(c(3,3,3.5,3.2),"cm")) 
       #legend.title = element_blank())
       
       
@@ -485,8 +493,12 @@ function(input, output, session) {
         ylab('daily positive cases per 100k') +
         xlab('date of test') +
         coord_cartesian(clip = "off")+
+        labs(caption = bquote('\nLast updated at'~bold(.(last_update_date))),
+             title = bquote('Seven day rolling average of new daily cases*\nData from PH England\n*Cases from last 4 days not included to correct for delay between test and report')) +
         theme_classic() +
         theme(strip.background  = element_blank(),
+              plot.caption = element_text(hjust = 1),
+              plot.title = element_text(hjust = 1,size = 8),
               strip.text.x = element_text(size = 12),
               axis.text.x = element_text(size=12),
               axis.title.x = element_text(size=14),
@@ -521,6 +533,7 @@ function(input, output, session) {
          pal = plasma,
          border = NA,
          bg = 'lightgrey')
+    
   }
   
   ###plot weekly changes in totals of infection in a map
@@ -551,7 +564,10 @@ function(input, output, session) {
          main = paste0('Change in total cases (per 100k population) between week ending ',week_ending_date,' and week ending ',as.Date(week_ending_date)-7),
          #breaks = "quantile", nbreaks = 12,
          nbreaks = 20,
+         #modifying wesanderson colour palette because I cannot make a coloramp with the package
+         #pal = colorRampPalette(c("#3C9AB2","#78B7C5","#EBCC2A","#E1AF00","#F12400")),
          pal = colorRampPalette(c("blue","white","red")),
+         #pal = inferno,
          border = NA,
          bg = 'lightgrey')
   }
