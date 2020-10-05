@@ -26,14 +26,14 @@ library(tibbletime)
 
 
 #### HEADER ####
-header = dashboardHeader(title = span("Coronavirus Cases in England", 
-                              style = "color: black; font-size: 12px"))
+header = dashboardHeader(title = "COVID19-England")
 
 #do not display data older than 10th March 2020
 maxweeks <- as.numeric(ceiling(difftime(Sys.Date(),as.Date("2020-03-10"),units='weeks')))
 #### SIDEBAR ####
 sidebar =  dashboardSidebar(width = 230,
                             sidebarMenu(id = "tabs",
+                                        menuItem("Info", tabName = "info", icon = icon("info-circle", lib = "font-awesome")),
                                         menuItem("Regions", tabName = "regions", icon = icon("city", lib = "font-awesome")),
                                         #menuItem("UTLA", tabName = "utla", icon = icon("city", lib = "font-awesome")),
                                         #menuItem("LTLA", tabName = "ltla", icon = icon("city", lib = "font-awesome")),
@@ -77,6 +77,18 @@ body  =  dashboardBody(tabItems(tabItem(tabName = "regions",
                                                      title = "Regions",
                                                      plotOutput("RegionPlot"),
                                                      br()))),
+                                tabItem(tabName = "info",
+                                        fluidPage(strong('Coronavirus cases in England'),
+                                                  br(),
+                                                  'Data from Public Health England',
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  'Scripts available at ',
+                                                  tags$a(href='https://github.com/javierigea/covid19_eng_dashboard', "Github"))),
+                                                  
+                                
+                                                  
                                                      
                                 # tabItem(tabName = "utla",
                                 #         fluidRow(box(width = 12,
