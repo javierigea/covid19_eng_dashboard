@@ -453,7 +453,7 @@ function(input, output, session) {
         theme_classic() +
         #labs(subtitle='Seven day rolling average of new cases\nData from PH England', hjust = 1)+
         coord_cartesian(clip = "off")+
-        labs(caption = bquote('\nLast updated at'~bold(.(last_update_date))),
+        labs(caption = bquote('\nLast updated at'~bold(.(format(last_update_date,"%d %b")))),
              title = bquote('Seven day rolling average of new daily cases*\nData from PH England\n*Cases from last 4 days not included to correct for delay between test and report')) +
         theme(strip.background  = element_blank(),
               plot.caption = element_text(hjust = 1),
@@ -495,7 +495,7 @@ function(input, output, session) {
         ylab('daily positive cases per 100k') +
         xlab('date of test') +
         coord_cartesian(clip = "off")+
-        labs(caption = bquote('\nLast updated at'~bold(.(last_update_date))),
+        labs(caption = bquote('\nLast updated at'~bold(.(format(last_update_date,"%d %b")))),
              title = bquote('Seven day rolling average of new daily cases*\nData from PH England\n*Cases from last 4 days not included to correct for delay between test and report')) +
         theme_classic() +
         theme(strip.background  = element_blank(),
@@ -540,7 +540,7 @@ function(input, output, session) {
     #      border = NA,
     #      bg = 'lightgrey')
     eng_map = ggplot() +
-      ggtitle(paste0('Total Cases (per 100k population) in week ending ',week_ending_date)) +
+      ggtitle(paste0('Total Cases (per 100k population) in week ending ',format(as.Date(week_ending_date),"%d %b"))) +
       geom_sf(data = data_counties_simplified, aes(fill = weekly_cases_pop), lwd = 0, color = NA) + 
       scale_fill_gradientn(colours = sf.colors(), limits = c(0,maxlimit)) +
       theme_void()
@@ -586,7 +586,7 @@ function(input, output, session) {
     maxlimit = max(data_counties_simplified$weekly_cases_change_pop,na.rm=T)
     minlimit = min(data_counties_simplified$weekly_cases_change_pop,na.rm=T)
     # plot(data_counties_simplified["weekly_cases_change_pop"],
-    #      main = paste0('Change in total cases (per 100k population) between week ending ',week_ending_date,' and week ending ',as.Date(week_ending_date)-7),
+    #      main = paste0('Change in total cases (per 100k population) between week ending ',format(week_ending_date,"%d %b"),' and week ending ',format(as.Date(week_ending_date)-7),"%d %b"),
     #      #breaks = "quantile", nbreaks = 12,
     #      nbreaks = 20,
     #      #modifying wesanderson colour palette because I cannot make a coloramp with the package
@@ -596,7 +596,7 @@ function(input, output, session) {
     #      border = NA,
     #      bg = 'lightgrey')
     eng_map = ggplot() +
-      ggtitle(paste0(paste0('Change in total cases (per 100k population) between week ending ',week_ending_date,' and week ending ',as.Date(week_ending_date)-7))) +
+      ggtitle(paste0(paste0('Change in total cases (per 100k population) between week ending ',format(as.Date(week_ending_date),"%d %b"),' and week ending ',format(as.Date(week_ending_date)-7,"%d %b")))) +
       geom_sf(data = data_counties_simplified, aes(fill = weekly_cases_change_pop), lwd = 0, color = NA) + 
       scale_fill_gradientn(colours = sf.colors(), limits = c(minlimit,maxlimit)) +
       theme_void()
