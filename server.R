@@ -408,7 +408,7 @@ function(input, output, session) {
       return(paste0(entity_match, ' - not valid name(s)!'))
     }
     #subset to timeframe
-    last_update_date <- as.character(max(data$specimen_date))
+    last_update_date <- format(as.Date(max(data$specimen_date)),"%d %b %y")
     data <- data %>%
       filter(specimen_date >= (max(as.Date(data$specimen_date))-(7*timeframe)))
     
@@ -453,7 +453,7 @@ function(input, output, session) {
         theme_classic() +
         #labs(subtitle='Seven day rolling average of new cases\nData from PH England', hjust = 1)+
         coord_cartesian(clip = "off")+
-        labs(caption = bquote('\nLast updated at'~bold(.(format(last_update_date,"%d %b")))),
+        labs(caption = bquote('\nLast updated at'~bold(.(last_update_date))),
              title = bquote('Seven day rolling average of new daily cases*\nData from PH England\n*Cases from last 4 days not included to correct for delay between test and report')) +
         theme(strip.background  = element_blank(),
               plot.caption = element_text(hjust = 1),
@@ -495,7 +495,7 @@ function(input, output, session) {
         ylab('daily positive cases per 100k') +
         xlab('date of test') +
         coord_cartesian(clip = "off")+
-        labs(caption = bquote('\nLast updated at'~bold(.(format(last_update_date,"%d %b")))),
+        labs(caption = bquote('\nLast updated at'~bold(.(last_update_date))),
              title = bquote('Seven day rolling average of new daily cases*\nData from PH England\n*Cases from last 4 days not included to correct for delay between test and report')) +
         theme_classic() +
         theme(strip.background  = element_blank(),
