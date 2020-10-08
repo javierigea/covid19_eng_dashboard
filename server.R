@@ -542,7 +542,7 @@ function(input, output, session) {
     eng_map = ggplot() +
       ggtitle(paste0('Total Cases (per 100k population) in week ending ',format(as.Date(week_ending_date),"%d %b"))) +
       geom_sf(data = data_counties_simplified, aes(fill = weekly_cases_pop), lwd = 0, color = NA) + 
-      scale_fill_gradientn(colours = sf.colors(), limits = c(0,maxlimit)) +
+      scale_fill_gradientn(colours = sf.colors(), limits = c(0,maxlimit), name = '') +
       theme_void()
     lon_map = ggplot() + 
       geom_sf(data = data_counties_simplified[grep('^E09',data_counties_simplified$LAD19CD),],
@@ -598,7 +598,7 @@ function(input, output, session) {
     eng_map = ggplot() +
       ggtitle(paste0(paste0('Change in total cases (per 100k population) between week ending ',format(as.Date(week_ending_date),"%d %b"),' and week ending ',format(as.Date(week_ending_date)-7,"%d %b")))) +
       geom_sf(data = data_counties_simplified, aes(fill = weekly_cases_change_pop), lwd = 0, color = NA) + 
-      scale_fill_gradientn(colours = sf.colors(), limits = c(minlimit,maxlimit)) +
+      scale_fill_gradientn(colours = sf.colors(), limits = c(minlimit,maxlimit), name = '') +
       theme_void()
     lon_map = ggplot() + 
       geom_sf(data = data_counties_simplified[grep('^E09',data_counties_simplified$LAD19CD),],
