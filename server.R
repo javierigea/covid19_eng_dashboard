@@ -541,15 +541,17 @@ function(input, output, session) {
     #      bg = 'lightgrey')
     eng_map = ggplot() +
       ggtitle(paste0('Total Cases (per 100k population) in week ending ',format(as.Date(week_ending_date),"%d %b"))) +
-      geom_sf(data = data_counties_simplified, aes(fill = weekly_cases_pop), lwd = 0, color = NA) + 
-      scale_fill_gradientn(colours = sf.colors(),limits = c(0,maxlimit), name = '') +
+      geom_sf(data = data_counties_simplified, aes(fill = weekly_cases_pop), lwd = 0.1, color = 'grey') + 
+      #scale_fill_gradientn(colours = sf.colors(),limits = c(0,maxlimit), name = '') +
+      scale_fill_stepsn(colours = rev(brewer.pal(9,'Spectral')),breaks =c(10,25,50,100,200,300,400,500),limits = c(0,maxlimit), name = '') +
       theme_void()
     lon_map = ggplot() + 
       geom_sf(data = data_counties_simplified[grep('^E09',data_counties_simplified$LAD19CD),],
-                aes(fill = weekly_cases_pop), lwd = 0, color = NA) +
+              aes(fill = weekly_cases_pop), lwd = 0.1, color = 'grey') +
       theme_void() +
-      scale_fill_gradientn(colours = sf.colors(), limits = c(0,maxlimit), guide = F)
-
+      #scale_fill_gradientn(colours = sf.colors(), limits = c(0,maxlimit), guide = F)
+      scale_fill_stepsn(colours = rev(brewer.pal(9,'Spectral')),breaks =c(10,25,50,100,200,300,400,500),limits = c(0,maxlimit), guide = F)
+    
     eng_lon_inset_map = ggdraw() +
       draw_plot(eng_map) +
       draw_plot(lon_map, x = 0.55, y = 0.65, width = 0.3, height = 0.3) 
