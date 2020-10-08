@@ -1,3 +1,4 @@
+library(cowplot)
 library(gridExtra)
 library(grid)
 library(shiny)
@@ -16,6 +17,7 @@ library(directlabels)
 library(viridis)
 library(sf)
 library(grDevices)
+library(readxl)
 
 
 function(input, output, session) {
@@ -526,6 +528,9 @@ function(input, output, session) {
                                       by.y = 'area_code',
                                       all.x = T)
     #plot the map
+    maxlimit = max(data_counties_simplified$weekly_cases_pop,na.rm=T)
+    
+    
     plot(data_counties_simplified["weekly_cases_pop"],
          main = paste0('Total Cases (per 100k population) in week ending ',week_ending_date),
          #breaks = "quantile", nbreaks = 12,
@@ -533,6 +538,23 @@ function(input, output, session) {
          pal = plasma,
          border = NA,
          bg = 'lightgrey')
+    eng_map = ggplot() +
+      ggtitle(paste0('Total Cases (per 100k population) in week ending ',week_ending_date)) +
+      geom_sf(data = data_counties_simplified, aes(fill = weekly_cases_pop), lwd = 0, color = NA) + 
+      scale_fill_gradientn(colours = sf.colors(), limits = c(0,maxlimit)) +
+      theme_void()
+    lon_map = ggplot() + 
+      geom_sf(data = data_counties_simplified[grep('^E09',data_counties_simplified$LAD19CD),],
+                aes(fill = weekly_cases_pop), lwd = 0, color = NA) +
+      theme_void() +
+      scale_fill_gradientn(colours = sf.colors(), limits = c(0,maxlimit), guide = F)
+
+    gg_inset_map1 = ggdraw() +
+      draw_plot(eng_map) +
+      draw_plot(lon_map, x = 0.55, y = 0.65, width = 0.3, height = 0.3)
+
+    gg_inset_map1
+      
     
   }
   
