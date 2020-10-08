@@ -528,16 +528,17 @@ function(input, output, session) {
                                       by.y = 'area_code',
                                       all.x = T)
     #plot the map
+    #get max for colour cases
     maxlimit = max(data_counties_simplified$weekly_cases_pop,na.rm=T)
     
     
-    plot(data_counties_simplified["weekly_cases_pop"],
-         main = paste0('Total Cases (per 100k population) in week ending ',week_ending_date),
-         #breaks = "quantile", nbreaks = 12,
-         nbreaks = 20,
-         pal = plasma,
-         border = NA,
-         bg = 'lightgrey')
+    # plot(data_counties_simplified["weekly_cases_pop"],
+    #      main = paste0('Total Cases (per 100k population) in week ending ',week_ending_date),
+    #      #breaks = "quantile", nbreaks = 12,
+    #      nbreaks = 20,
+    #      pal = plasma,
+    #      border = NA,
+    #      bg = 'lightgrey')
     eng_map = ggplot() +
       ggtitle(paste0('Total Cases (per 100k population) in week ending ',week_ending_date)) +
       geom_sf(data = data_counties_simplified, aes(fill = weekly_cases_pop), lwd = 0, color = NA) + 
@@ -549,11 +550,10 @@ function(input, output, session) {
       theme_void() +
       scale_fill_gradientn(colours = sf.colors(), limits = c(0,maxlimit), guide = F)
 
-    gg_inset_map1 = ggdraw() +
+    eng_lon_inset_map = ggdraw() +
       draw_plot(eng_map) +
-      draw_plot(lon_map, x = 0.55, y = 0.65, width = 0.3, height = 0.3)
-
-    gg_inset_map1
+      draw_plot(lon_map, x = 0.50, y = 0.65, width = 0.3, height = 0.3) 
+    eng_lon_inset_map
       
     
   }
@@ -582,16 +582,35 @@ function(input, output, session) {
                                       by.y = 'area_code',
                                       all.x = T)
     #plot the map
-    plot(data_counties_simplified["weekly_cases_change_pop"],
-         main = paste0('Change in total cases (per 100k population) between week ending ',week_ending_date,' and week ending ',as.Date(week_ending_date)-7),
-         #breaks = "quantile", nbreaks = 12,
-         nbreaks = 20,
-         #modifying wesanderson colour palette because I cannot make a coloramp with the package
-         #pal = colorRampPalette(c("#3C9AB2","#78B7C5","#EBCC2A","#E1AF00","#F12400")),
-         pal = colorRampPalette(c("blue","white","red")),
-         #pal = inferno,
-         border = NA,
-         bg = 'lightgrey')
+    #get max for colour cases
+    maxlimit = max(data_counties_simplified$weekly_cases_change_pop,na.rm=T)
+    minlimit = min(data_counties_simplified$weekly_cases_change_pop,na.rm=T)
+    # plot(data_counties_simplified["weekly_cases_change_pop"],
+    #      main = paste0('Change in total cases (per 100k population) between week ending ',week_ending_date,' and week ending ',as.Date(week_ending_date)-7),
+    #      #breaks = "quantile", nbreaks = 12,
+    #      nbreaks = 20,
+    #      #modifying wesanderson colour palette because I cannot make a coloramp with the package
+    #      #pal = colorRampPalette(c("#3C9AB2","#78B7C5","#EBCC2A","#E1AF00","#F12400")),
+    #      pal = colorRampPalette(c("blue","white","red")),
+    #      #pal = inferno,
+    #      border = NA,
+    #      bg = 'lightgrey')
+    eng_map = ggplot() +
+      ggtitle(paste0(paste0('Change in total cases (per 100k population) between week ending ',week_ending_date,' and week ending ',as.Date(week_ending_date)-7))) +
+      geom_sf(data = data_counties_simplified, aes(fill = weekly_cases_change_pop), lwd = 0, color = NA) + 
+      scale_fill_gradientn(colours = sf.colors(), limits = c(minlimit,maxlimit)) +
+      theme_void()
+    lon_map = ggplot() + 
+      geom_sf(data = data_counties_simplified[grep('^E09',data_counties_simplified$LAD19CD),],
+              aes(fill = weekly_cases_change_pop), lwd = 0, color = NA) +
+      theme_void() +
+      scale_fill_gradientn(colours = sf.colors(), limits = c(minlimit,maxlimit), guide = F)
+    
+    englon_inset_map = ggdraw() +
+      draw_plot(eng_map) +
+      draw_plot(lon_map, x = 0.50, y = 0.65, width = 0.3, height = 0.3) 
+    englon_inset_map
+    
   }
   
   ##################END OF FUNCTIONS BLOCK##################
