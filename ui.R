@@ -62,9 +62,9 @@ sidebar =  dashboardSidebar(width = 230,
                                                          checkboxInput("selLocAuthAdj", "Show positives per 100,000 population", value = TRUE),
                                                          sliderInput("selLocAuthTime", "Number of weeks of data to include:", ticks = FALSE, min = 2, max = maxweeks, value = 4, step = 1)),
                                         conditionalPanel(condition = "['map_weekly_cases'].includes(input.tabs)",
-                                                         dateInput("selWeekEnding", "Show total cases for week ending on", min = '2020-03-10', max = Sys.Date()-4),default = Sys.Date()-4),
+                                                         dateInput("selWeekEnding", "Show total cases for week ending on", min = '2020-03-10', max = Sys.Date()-4),default = ''),
                                         conditionalPanel(condition = "['map_change_weekly_cases'].includes(input.tabs)",
-                                                         dateInput("selChangeWeekEnding", "Show change in total cases for week ending on and previous week", min = '2020-03-10', max = Sys.Date()-4),default = Sys.Date()-4)
+                                                         dateInput("selChangeWeekEnding", "Show change in total cases for week ending on and previous week", min = '2020-03-10', max = Sys.Date()-4),default = '')
                                                        
                                         )
                             )
