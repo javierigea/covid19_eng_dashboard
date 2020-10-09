@@ -451,18 +451,21 @@ function(input, output, session) {
         ylab('daily positive cases') +
         xlab('date of test') +
         theme_classic() +
+        labs(title = bquote(~bold(.('New confirmed daily cases'))),
+             subtitle = '\n*Seven-day rolling average of new cases') +
         #labs(subtitle='Seven day rolling average of new cases\nData from PH England', hjust = 1)+
         coord_cartesian(clip = "off")+
-        labs(caption = bquote('\nLast updated at'~bold(.(last_update_date))),
-             title = bquote('Seven day rolling average of new daily cases*\nData from PH England\n*Cases from last 4 days not included to correct for delay between test and report')) +
+        # labs(caption = bquote('\nLast updated at'~bold(.(last_update_date))),
+        #      title = bquote('Seven day rolling average of new daily cases*\nData from PH England\n*Cases from last 4 days not included to correct for delay between test and report')) +
         theme(strip.background  = element_blank(),
-              plot.caption = element_text(hjust = 1),
-              plot.title = element_text(hjust = 1,size = 8),
+              #plot.caption = element_text(hjust = 1),
+              plot.title = element_text(hjust = 0.5,size = 12),
+              plot.subtitle = element_text(hjust = 0.5, size = 10),
               strip.text.x = element_text(size = 12),
               axis.text.x = element_text(size=12),
-              axis.title.x = element_text(size=14),
+              axis.title.x = element_text(size=12),
               axis.text.y = element_text(size=12),
-              axis.title.y = element_text(size=14),
+              axis.title.y = element_blank(),
               plot.margin=unit(c(3,3,3.5,3.2),"cm")) 
       #legend.title = element_blank())
       
@@ -495,18 +498,19 @@ function(input, output, session) {
         ylab('daily positive cases per 100k') +
         xlab('date of test') +
         coord_cartesian(clip = "off")+
-        labs(caption = bquote('\nLast updated at'~bold(.(last_update_date))),
-             title = bquote('Seven day rolling average of new daily cases*\nData from PH England\n*Cases from last 4 days not included to correct for delay between test and report')) +
+        labs(title = bquote(~bold(.('New confirmed daily cases'))),
+             subtitle = '\n*Seven-day rolling average of new cases (per 100,000)') +
         theme_classic() +
         theme(strip.background  = element_blank(),
-              plot.caption = element_text(hjust = 1),
-              plot.title = element_text(hjust = 1,size = 8),
+              #plot.caption = element_text(hjust = 1),
+              plot.title = element_text(hjust = 0.5,size = 12),
+              plot.subtitle = element_text(hjust = 0.5, size = 10),
               strip.text.x = element_text(size = 12),
               axis.text.x = element_text(size=12),
-              axis.title.x = element_text(size=14),
+              axis.title.x = element_text(size=12),
               axis.text.y = element_text(size=12),
-              axis.title.y = element_text(size=14),
-              plot.margin=unit(c(3,3,3.5,3.2),"cm"))
+              axis.title.y = element_blank(),
+              plot.margin=unit(c(3,3,3.5,3.2),"cm")) 
       #legend.title = element_blank())
     }
   }

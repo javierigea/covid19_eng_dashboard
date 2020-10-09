@@ -30,6 +30,11 @@ header = dashboardHeader(title = "COVID19-England")
 
 #do not display data older than 10th March 2020
 maxweeks <- as.numeric(ceiling(difftime(Sys.Date(),as.Date("2020-03-10"),units='weeks')))
+
+data <- read_csv("https://coronavirus.data.gov.uk/downloads/csv/coronavirus-cases_latest.csv") %>% 
+  clean_names()
+
+last_update_date <- format(as.Date(max(data$specimen_date)),"%d %b %y")
 #### SIDEBAR ####
 sidebar =  dashboardSidebar(width = 230,
                             sidebarMenu(id = "tabs",
@@ -41,8 +46,8 @@ sidebar =  dashboardSidebar(width = 230,
                                         menuItem("Map of Weekly Cases", tabName = "map_weekly_cases", icon = icon("map", lib = "font-awesome")),
                                         menuItem("Map of Change in Weekly Cases", tabName = "map_change_weekly_cases", icon = icon("map", lib = "font-awesome")),
                                         conditionalPanel(condition = "['regions'].includes(input.tabs)",
-                                                         selectInput("selRegionNames", "Regions", choices ="", multiple = TRUE, selectize = TRUE),
-                                                         checkboxInput("selRegionAdj", "Show positives per 100k in Region", value = TRUE),
+                                                         selectInput("selRegionNames", "Regions - pick up to 8", choices ="", multiple = TRUE, selectize = TRUE),
+                                                         checkboxInput("selRegionAdj", "Show positives per 100,000 population", value = TRUE),
                                                          numericInput("selRegionTime", "Last N Weeks", min = 2, max = maxweeks, value = 4, step = 1)),
                                         # conditionalPanel(condition = "['utla'].includes(input.tabs)",
                                         #                  selectInput("selUtlaNames", "UTLA", choices ="", multiple = TRUE, selectize = TRUE),
@@ -53,8 +58,8 @@ sidebar =  dashboardSidebar(width = 230,
                                         #                  checkboxInput("selLtlaAdj", "Show positives per 100k in LTLA", value = TRUE),
                                         #                  sliderInput("selLtlaTime", "Last N Weeks", ticks = FALSE, min = 2, max = maxweeks, value = 2, step = 1)),
                                         conditionalPanel(condition = "['locauth'].includes(input.tabs)",
-                                                         selectInput("selLocAuthNames", "Local Authorities", choices ="", multiple = TRUE, selectize = TRUE),
-                                                         checkboxInput("selLocAuthAdj", "Show positives per 100k in Local Authority", value = TRUE),
+                                                         selectInput("selLocAuthNames", "Local Authorities - pick up to 8", choices ="", multiple = TRUE, selectize = TRUE),
+                                                         checkboxInput("selLocAuthAdj", "Show positives per 100,000 population", value = TRUE),
                                                          sliderInput("selLocAuthTime", "Last N Weeks", ticks = FALSE, min = 2, max = maxweeks, value = 2, step = 1)),
                                         conditionalPanel(condition = "['map_weekly_cases'].includes(input.tabs)",
                                                          dateInput("selWeekEnding", "Show total cases for week ending on", min = '2020-03-10', max = Sys.Date()-4),default = Sys.Date()-4),
@@ -74,17 +79,21 @@ sidebar =  dashboardSidebar(width = 230,
 #### BODY ####
 body  =  dashboardBody(tabItems(tabItem(tabName = "regions",
                                         fluidRow(box(width = 12,
-                                                     title = "Regions",
-                                                     plotOutput("RegionPlot"),
-                                                     br()))),
+                                                     title = "COVID-19 cases in regions in England",
+                                                     plotOutput("RegionPlot")))),
+                                                     #br()))),
                                 tabItem(tabName = "info",
                                         fluidPage(strong('Coronavirus cases in England'),
                                                   br(),
                                                   'Data from Public Health England',
                                                   br(),
+                                                  'Last updated on ',strong(last_update_date),
+                                                  br(),
+                                                  em('*Cases from last 4 days not included to correct for delay between test and report'),
                                                   br(),
                                                   br(),
-                                                  'Scripts available at ',
+                                                  br(),
+                                                  'Scripts available on ',
                                                   tags$a(href='https://github.com/javierigea/covid19_eng_dashboard', "Github"))),
                                                   
                                 
@@ -102,7 +111,7 @@ body  =  dashboardBody(tabItems(tabItem(tabName = "regions",
                                 #                      br()))),
                                 tabItem(tabName = "locauth",
                                         fluidRow(box(width = 12,
-                                                     title = "COVID-19 Cases in Local Authorities in England",
+                                                     title = "COVID-19 cases in local authorities in England",
                                                      plotOutput("LocAuthPlot"),
                                                      br()))),
                                 tabItem(tabName = "map_weekly_cases",
