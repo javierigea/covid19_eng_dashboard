@@ -536,15 +536,7 @@ function(input, output, session) {
       mutate(weekly_cases_pop = replace(weekly_cases_pop, weekly_cases_pop>500, 501))
     #set maxlimit to 501
     maxlimit = 501
-    
-    
-    # plot(data_counties_simplified["weekly_cases_pop"],
-    #      main = paste0('Total Cases (per 100k population) in week ending ',week_ending_date),
-    #      #breaks = "quantile", nbreaks = 12,
-    #      nbreaks = 20,
-    #      pal = plasma,
-    #      border = NA,
-    #      bg = 'lightgrey')
+
     eng_map = ggplot() +
       ggtitle(paste0('Total Cases (per 100k population) in week ending ',format(as.Date(week_ending_date),"%d %b"))) +
       geom_sf(data = data_counties_simplified, aes(fill = weekly_cases_pop), lwd = 0.1, color = 'grey') + 
@@ -589,30 +581,32 @@ function(input, output, session) {
                                       by.x = 'LAD19CD',
                                       by.y = 'area_code',
                                       all.x = T)
-    #plot the map
-    #get max for colour cases
-    maxlimit = max(data_counties_simplified$weekly_cases_change_pop,na.rm=T)
-    minlimit = min(data_counties_simplified$weekly_cases_change_pop,na.rm=T)
-    # plot(data_counties_simplified["weekly_cases_change_pop"],
-    #      main = paste0('Change in total cases (per 100k population) between week ending ',format(week_ending_date,"%d %b"),' and week ending ',format(as.Date(week_ending_date)-7),"%d %b"),
-    #      #breaks = "quantile", nbreaks = 12,
-    #      nbreaks = 20,
-    #      #modifying wesanderson colour palette because I cannot make a coloramp with the package
-    #      #pal = colorRampPalette(c("#3C9AB2","#78B7C5","#EBCC2A","#E1AF00","#F12400")),
-    #      pal = colorRampPalette(c("blue","white","red")),
-    #      #pal = inferno,
-    #      border = NA,
-    #      bg = 'lightgrey')
+    
+    data_counties_simplified <- data_counties_simplified %>% 
+      mutate(weekly_cases_change_pop = replace(weekly_cases_change_pop, weekly_cases_change_pop>200, 201)) %>% 
+      mutate(weekly_cases_change_pop = replace(weekly_cases_change_pop, weekly_cases_change_pop<-100, -101))
+    
+    #set maxlimit to 501
+    maxlimit = 201
+    minlimit = -101
+    
+    #create colour scale
+    colour_scale_change <- c(rev(colorRampPalette(c('white','blue'))(5))[c(1:3)],colorRampPalette(c('white','red'))(7)[c(2:7)])
+    
     eng_map = ggplot() +
       ggtitle(paste0(paste0('Change in total cases (per 100k population) between week ending ',format(as.Date(week_ending_date),"%d %b"),' and week ending ',format(as.Date(week_ending_date)-7,"%d %b")))) +
       geom_sf(data = data_counties_simplified, aes(fill = weekly_cases_change_pop), lwd = 0, color = NA) + 
-      scale_fill_gradientn(colours = sf.colors(), limits = c(minlimit,maxlimit), name = '') +
+      scale_fill_stepsn(colours = colour_scale_change,breaks =c(-Inf,-100,-50,-25,0,25,50,100,200,Inf),limits = c(minlimit,maxlimit), name = '') +
+      
+      #scale_fill_gradientn(colours = sf.colors(), limits = c(minlimit,maxlimit), name = '') +
       theme_void()
     lon_map = ggplot() + 
       geom_sf(data = data_counties_simplified[grep('^E09',data_counties_simplified$LAD19CD),],
               aes(fill = weekly_cases_change_pop), lwd = 0, color = NA) +
-      theme_void() +
-      scale_fill_gradientn(colours = sf.colors(), limits = c(minlimit,maxlimit), guide = F)
+      scale_fill_stepsn(colours = colour_scale_change,breaks =c(-Inf,-100,-50,-25,0,25,50,100,200,Inf),limits = c(minlimit,maxlimit), name = '', guide = F) +
+      theme_void()
+    
+    
     
     englon_inset_map = ggdraw() +
       draw_plot(eng_map) +
