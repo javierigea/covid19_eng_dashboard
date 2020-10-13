@@ -23,9 +23,15 @@ library(readxl)
 function(input, output, session) {
   latest_csv_path <- "https://coronavirus.data.gov.uk/downloads/csv/coronavirus-cases_latest.csv"
   
-  pop_xls_path <- './data/ukmidyearestimates20192020ladcodes.xls'
+  # pop_xls_path <- './data/ukmidyearestimates20192020ladcodes.xls'
+  # 
+  # pop_data <- read_excel(pop_xls_path, sheet = 6, skip = 4)
+  # pop_data <- pop_data %>%
+  #   clean_names() %>%
+  #   select(code, all_ages)
   
-  pop_data <- read_excel(pop_xls_path, sheet = 6, skip = 4)
+  pop_csv_path <- './data/pop_data.csv'
+  pop_data <- read_csv(pop_csv_path)
   pop_data <- pop_data %>%
     clean_names() %>%
     select(code, all_ages)
@@ -39,8 +45,8 @@ function(input, output, session) {
     get_cases_data <- function(latest_csv_path,
                                mode = c('local','region')){
       #get pop data
-      pop_xls_path <- './data/ukmidyearestimates20192020ladcodes.xls'
-      pop_data <- read_excel(pop_xls_path, sheet = 6, skip = 4)
+      pop_csv_path <- './data/pop_data.csv'
+      pop_data <- read_csv(pop_csv_path)
       pop_data <- pop_data %>%
         clean_names() %>%
         select(code, all_ages)
@@ -528,7 +534,7 @@ function(input, output, session) {
     #add column of weekly_cases_pop to dataframe
     data_counties_simplified <- merge(map,
                                       local_cases_data_sum,
-                                      by.x = 'LAD19CD',
+                                      by.x = 'lad19cd',
                                       by.y = 'area_code',
                                       all.x = T)
     #replace anything >500 by 501
@@ -544,7 +550,7 @@ function(input, output, session) {
       scale_fill_stepsn(colours = rev(brewer.pal(9,'Spectral')),breaks =c(10,25,50,100,200,300,400,500),limits = c(0,maxlimit), name = '') +
       theme_void()
     lon_map = ggplot() + 
-      geom_sf(data = data_counties_simplified[grep('^E09',data_counties_simplified$LAD19CD),],
+      geom_sf(data = data_counties_simplified[grep('^E09',data_counties_simplified$lad19cd),],
               aes(fill = weekly_cases_pop), lwd = 0.1, color = 'grey') +
       theme_void() +
       #scale_fill_gradientn(colours = sf.colors(), limits = c(0,maxlimit), guide = F)
@@ -578,13 +584,13 @@ function(input, output, session) {
     #add column of weekly_cases_pop to dataframe
     data_counties_simplified <- merge(map,
                                       local_change_cases_data_week,
-                                      by.x = 'LAD19CD',
+                                      by.x = 'lad19cd',
                                       by.y = 'area_code',
                                       all.x = T)
     
     data_counties_simplified <- data_counties_simplified %>% 
       mutate(weekly_cases_change_pop = replace(weekly_cases_change_pop, weekly_cases_change_pop>200, 201)) %>% 
-      mutate(weekly_cases_change_pop = replace(weekly_cases_change_pop, weekly_cases_change_pop<-100, -101))
+      mutate(weekly_cases_change_pop = replace(weekly_cases_change_pop, weekly_cases_change_pop<(-100), -101))
     
     #set maxlimit to 501
     maxlimit = 201
@@ -601,7 +607,7 @@ function(input, output, session) {
       #scale_fill_gradientn(colours = sf.colors(), limits = c(minlimit,maxlimit), name = '') +
       theme_void()
     lon_map = ggplot() + 
-      geom_sf(data = data_counties_simplified[grep('^E09',data_counties_simplified$LAD19CD),],
+      geom_sf(data = data_counties_simplified[grep('^E09',data_counties_simplified$lad19cd),],
               aes(fill = weekly_cases_change_pop), lwd = 0, color = NA) +
       scale_fill_stepsn(colours = colour_scale_change,breaks =c(-Inf,-100,-50,-25,0,25,50,100,200,Inf),limits = c(minlimit,maxlimit), name = '', guide = F) +
       theme_void()
