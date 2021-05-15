@@ -1,5 +1,7 @@
 # covid19_eng_dashboard
 
+**Note: As of 26/04/21 the format of the case data on coronavirus.data.gov.uk has changed and the dashboard is no longer working**
+
 Dashboard for COVID-19 case counts in England
 
 https://covid19eng.shinyapps.io/dashboard/
